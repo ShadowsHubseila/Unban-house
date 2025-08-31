@@ -1,0 +1,50 @@
+-- 🔹 Script sem UI para remover banimentos e barreiras
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local playerName = LocalPlayer.Name
+
+-- Função que remove banimentos e barreiras
+local function desbanirJogador()
+    local lots = workspace:FindFirstChild("001_Lots")
+    if not lots then return end
+
+    for _, house in pairs(lots:GetChildren()) do
+        local picked = house:FindFirstChild("HousePickedByPlayer")
+        if picked then
+            local model = picked:FindFirstChild("HouseModel")
+            if model then
+                -- Remover de BannedPlayers
+                local mailbox = model:FindFirstChild("001_MailBox")
+                if mailbox then
+                    local letter = mailbox:FindFirstChild("LetterFake")
+                    if letter and letter:FindFirstChild("U1") then
+                        local bannedPlayers = letter.U1:FindFirstChild("BannedPlayers")
+                        if bannedPlayers then
+                            for _, obj in pairs(bannedPlayers:GetChildren()) do
+                                if obj.Name == playerName then
+                                    obj:Destroy()
+                                    print("✅ Removido da lista de banidos de: " .. house.Name)
+                                end
+                            end
+                        end
+                    end
+                end
+
+                -- Destruir BannedBlock (a barreira vermelha)
+                local bannedBlock = model:FindFirstChild("BannedBlock")
+                if bannedBlock then
+                    bannedBlock:Destroy()
+                    print("🚪 BannedBlock destruído em: " .. house.Name)
+                end
+            end
+        end
+    end
+end
+
+-- Loop automático infinito
+task.spawn(function()
+    while true do
+        pcall(desbanirJogador)
+        task.wait(3) -- verifica a cada 3 segundos
+    end
+end)
